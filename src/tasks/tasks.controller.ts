@@ -13,68 +13,57 @@ import { CreateTaskDto } from './dto/create-task.dto';
 import { GetTaskByIdDto } from './dto/get-task-by-id.dto';
 import { GetTasksFilterDto } from './dto/get-tasks-filter.dto';
 import { UpdateTaskStatusDto } from './dto/update-task-status.dto';
-import { Task } from './task.model';
 import { TasksService } from './tasks.service';
+import { Task } from './task.entity';
 
 @Controller('tasks')
 export class TasksController {
   constructor(private readonly tasksService: TasksService) {}
 
   @Get()
-  getTasks(@Query() filterDto: GetTasksFilterDto): Task[] {
-    if (Object.keys(filterDto).length) {
-      Logger.log(
-        `Getting tasks with filters: ${JSON.stringify(filterDto)}`,
-        TasksController.name,
-      );
-      const response = this.tasksService.getTasksWithFilters(filterDto);
-      Logger.log(
-        `Found ${response.length} tasks with applied filters`,
-        TasksController.name,
-      );
-      return response;
-    }
-
-    Logger.log('Getting all tasks', TasksController.name);
-    const response = this.tasksService.getAllTasks();
+  async getTasks(@Query() filterDto: GetTasksFilterDto): Promise<Task[]> {
+    Logger.log(
+      'Getting all tasks',
+      { filter: filterDto },
+      TasksController.name,
+    );
+    const response = await this.tasksService.getTasks(filterDto);
     Logger.log(`Found ${response.length} tasks`, TasksController.name);
     return response;
   }
 
   @Get('/:id')
-  getTaskById(@Param() getTaskByIdDto: GetTaskByIdDto): Task {
+  async getTaskById(@Param() getTaskByIdDto: GetTaskByIdDto): Promise<Task> {
     const { id } = getTaskByIdDto;
     Logger.log(`Getting task with ID ${id}`, TasksController.name);
-    const response = this.tasksService.getTaskById(id);
-    if (response) {
-      Logger.log(`Found task with ID ${id}`, TasksController.name);
-    }
+    const response = await this.tasksService.getTaskById(id);
+    Logger.log(`Retrieved task with ID ${id}`, TasksController.name);
     return response;
   }
 
   @Post()
-  createTask(@Body() createTaskDto: CreateTaskDto): Task {
+  async createTask(@Body() createTaskDto: CreateTaskDto): Promise<Task> {
     Logger.log('Creating a new task', TasksController.name);
-    const response = this.tasksService.createTask(createTaskDto);
+    const response = await this.tasksService.createTask(createTaskDto);
     Logger.log(`Created task with ID ${response.id}`, TasksController.name);
     return response;
   }
 
   @Delete('/:id')
-  deleteTask(@Param('id') id: string): void {
+  async deleteTask(@Param('id') id: string): Promise<void> {
     Logger.log(`Deleting task with ID ${id}`, TasksController.name);
-    this.tasksService.deleteTask(id);
+    await this.tasksService.deleteTask(id);
     Logger.log(`Deleted task with ID ${id}`, TasksController.name);
   }
 
   @Patch('/:id/status')
-  updateTaskStatus(
+  async updateTaskStatus(
     @Param('id') id: string,
     @Body() updateTaskStatusDto: UpdateTaskStatusDto,
-  ): Task {
+  ): Promise<Task> {
     const { status } = updateTaskStatusDto;
     Logger.log(`Updating status of task with ID ${id}`, TasksController.name);
-    const response = this.tasksService.updateTaskStatus(id, status);
+    const response = await this.tasksService.updateTaskStatus(id, status);
     Logger.log(
       `Updated status of task with ID ${id} to ${status}`,
       TasksController.name,
