@@ -23,23 +23,21 @@ import { TasksService } from './tasks.service';
 @Controller('tasks')
 @UseGuards(AuthGuard())
 export class TasksController {
-  constructor(private readonly tasksService: TasksService) {}
+  constructor(
+    private readonly tasksService: TasksService,
+    private readonly logger: Logger,
+  ) {}
 
   @Get()
   async getTasks(
     @Query() filterDto: GetTasksFilterDto,
     @GetUser() user: User,
   ): Promise<Task[]> {
-    Logger.log(
-      `Getting all tasks for user ${user.username}`,
-      { filter: filterDto },
-      TasksController.name,
-    );
+    this.logger.log(`Getting all tasks for user ${user.username}`, {
+      filter: filterDto,
+    });
     const response = await this.tasksService.getTasks(filterDto, user);
-    Logger.log(
-      `Found ${response.length} tasks for user ${user.username}`,
-      TasksController.name,
-    );
+    this.logger.log(`Found ${response.length} tasks for user ${user.username}`);
     return response;
   }
 
@@ -49,15 +47,9 @@ export class TasksController {
     @GetUser() user: User,
   ): Promise<Task> {
     const { id } = getTaskByIdDto;
-    Logger.log(
-      `Getting task with ID ${id} for user ${user.username}`,
-      TasksController.name,
-    );
+    this.logger.log(`Getting task with ID ${id} for user ${user.username}`);
     const response = await this.tasksService.getTaskById(id, user);
-    Logger.log(
-      `Retrieved task with ID ${id} for user ${user.username}`,
-      TasksController.name,
-    );
+    this.logger.log(`Retrieved task with ID ${id} for user ${user.username}`);
     return response;
   }
 
@@ -66,12 +58,9 @@ export class TasksController {
     @Body() createTaskDto: CreateTaskDto,
     @GetUser() user: User,
   ): Promise<Task> {
-    Logger.log(
-      `Creating a new task for user ${user.username}`,
-      TasksController.name,
-    );
+    this.logger.log(`Creating a new task for user ${user.username}`);
     const response = await this.tasksService.createTask(createTaskDto, user);
-    Logger.log(`Created task with ID ${response.id}`, TasksController.name);
+    this.logger.log(`Created task with ID ${response.id}`);
     return response;
   }
 
@@ -80,15 +69,9 @@ export class TasksController {
     @Param('id') id: string,
     @GetUser() user: User,
   ): Promise<void> {
-    Logger.log(
-      `Deleting task with ID ${id} for user ${user.username}`,
-      TasksController.name,
-    );
+    this.logger.log(`Deleting task with ID ${id} for user ${user.username}`);
     await this.tasksService.deleteTask(id, user);
-    Logger.log(
-      `Deleted task with ID ${id} for user ${user.username}`,
-      TasksController.name,
-    );
+    this.logger.log(`Deleted task with ID ${id} for user ${user.username}`);
   }
 
   @Patch('/:id/status')
@@ -98,14 +81,12 @@ export class TasksController {
     @GetUser() user: User,
   ): Promise<Task> {
     const { status } = updateTaskStatusDto;
-    Logger.log(
+    this.logger.log(
       `Updating status of task with ID ${id} for user ${user.username}`,
-      TasksController.name,
     );
     const response = await this.tasksService.updateTaskStatus(id, status, user);
-    Logger.log(
+    this.logger.log(
       `Updated status of task with ID ${id} to ${status} for user ${user.username}`,
-      TasksController.name,
     );
     return response;
   }

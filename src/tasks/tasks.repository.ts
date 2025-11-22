@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { User } from 'src/auth/user.entity';
 import { DataSource, Repository } from 'typeorm';
 import { CreateTaskDto } from './dto/create-task.dto';
@@ -16,7 +16,10 @@ export class TasksRepository
   extends Repository<Task>
   implements ITasksRepository
 {
-  constructor(private dataSource: DataSource) {
+  constructor(
+    private dataSource: DataSource,
+    private readonly logger: Logger,
+  ) {
     super(Task, dataSource.createEntityManager());
   }
 

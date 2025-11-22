@@ -4,10 +4,10 @@ import {
   InternalServerErrorException,
   Logger,
 } from '@nestjs/common';
-import { DataSource, QueryFailedError, Repository } from 'typeorm';
-import { User } from './user.entity';
-import { AuthCredentialsDto } from './dto/auth-credentials.dto';
 import { genSalt, hash } from 'bcrypt';
+import { DataSource, QueryFailedError, Repository } from 'typeorm';
+import { AuthCredentialsDto } from './dto/auth-credentials.dto';
+import { User } from './user.entity';
 
 interface IUsersRepository {
   createUser(authCredentialsDto: AuthCredentialsDto): Promise<void>;
@@ -18,7 +18,10 @@ export class UsersRepository
   extends Repository<User>
   implements IUsersRepository
 {
-  constructor(private dataSource: DataSource) {
+  constructor(
+    private dataSource: DataSource,
+    private readonly logger: Logger,
+  ) {
     super(User, dataSource.createEntityManager());
   }
 
@@ -38,14 +41,14 @@ export class UsersRepository
         'code' in error &&
         error.code === '23505'
       ) {
-        Logger.error(
+        this.logger.error(
           `Username "${username}" already exists`,
           UsersRepository.name,
         );
         throw new ConflictException(`Username "${username}" already exists`);
       }
 
-      Logger.error(
+      this.logger.error(
         `Failed to create user "${username}"`,
         { error: JSON.stringify(error) },
         UsersRepository.name,

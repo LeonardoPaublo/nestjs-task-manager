@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Logger, Module } from '@nestjs/common';
 import { TasksController } from './tasks.controller';
 import { TasksService } from './tasks.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -12,11 +12,15 @@ import { AuthModule } from 'src/auth/auth.module';
   controllers: [TasksController],
   providers: [
     {
+      provide: Logger,
+      useValue: new Logger(TasksController.name, { timestamp: true }),
+    },
+    {
       provide: TasksRepository,
-      useFactory: (dataSource: DataSource) => {
-        return new TasksRepository(dataSource);
+      useFactory: (dataSource: DataSource, logger: Logger) => {
+        return new TasksRepository(dataSource, logger);
       },
-      inject: [DataSource],
+      inject: [DataSource, Logger],
     },
     TasksService,
   ],

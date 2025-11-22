@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Logger, Module } from '@nestjs/common';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -23,11 +23,15 @@ import { JwtStrategy } from './jwt.strategy';
   controllers: [AuthController],
   providers: [
     {
+      provide: Logger,
+      useValue: new Logger(AuthController.name, { timestamp: true }),
+    },
+    {
       provide: UsersRepository,
-      useFactory: (dataSource: DataSource) => {
-        return new UsersRepository(dataSource);
+      useFactory: (dataSource: DataSource, logger: Logger) => {
+        return new UsersRepository(dataSource, logger);
       },
-      inject: [DataSource],
+      inject: [DataSource, Logger],
     },
     AuthService,
     JwtStrategy,

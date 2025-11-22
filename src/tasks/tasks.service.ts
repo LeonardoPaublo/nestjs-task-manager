@@ -16,7 +16,10 @@ interface ITaskService {
 
 @Injectable()
 export class TasksService implements ITaskService {
-  constructor(private readonly taskRepository: TasksRepository) {}
+  constructor(
+    private readonly taskRepository: TasksRepository,
+    private readonly logger: Logger,
+  ) {}
 
   getTasks(filterDto: GetTasksFilterDto, user: User): Promise<Task[]> {
     return this.taskRepository.getTasks(filterDto, user);
@@ -25,7 +28,7 @@ export class TasksService implements ITaskService {
   async getTaskById(id: string, user: User): Promise<Task> {
     const task = await this.taskRepository.findOne({ where: { id, user } });
     if (!task) {
-      Logger.error(`Task with ID "${id}" not found`, TasksService.name);
+      this.logger.error(`Task with ID "${id}" not found`);
       throw new NotFoundException(`Task with ID "${id}" not found`);
     }
     return task;
@@ -38,7 +41,7 @@ export class TasksService implements ITaskService {
   async deleteTask(id: string, user: User): Promise<void> {
     const result = await this.taskRepository.delete({ id, user });
     if (result.affected === 0) {
-      Logger.error(`Task with ID "${id}" not found`, TasksService.name);
+      this.logger.error(`Task with ID "${id}" not found`);
       throw new NotFoundException(`Task with ID "${id}" not found`);
     }
   }
