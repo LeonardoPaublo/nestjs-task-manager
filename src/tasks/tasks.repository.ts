@@ -7,7 +7,7 @@ import { TaskStatus } from './task-status.enum';
 import { Task } from './task.entity';
 
 interface ITasksRepository {
-  getTasks(filterDto: GetTasksFilterDto): Promise<Task[]>;
+  getTasks(filterDto: GetTasksFilterDto, user: User): Promise<Task[]>;
   createTask(createTaskDto: CreateTaskDto, user: User): Promise<Task>;
 }
 
@@ -20,9 +20,10 @@ export class TasksRepository
     super(Task, dataSource.createEntityManager());
   }
 
-  async getTasks(filterDto: GetTasksFilterDto): Promise<Task[]> {
+  async getTasks(filterDto: GetTasksFilterDto, user: User): Promise<Task[]> {
     const { status, search } = filterDto;
     const query = this.createQueryBuilder('task');
+    query.where({ user });
 
     if (status) {
       query.andWhere('task.status = :status', { status });
