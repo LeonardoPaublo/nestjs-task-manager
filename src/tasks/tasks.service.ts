@@ -1,14 +1,15 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { User } from 'src/auth/user.entity';
 import { CreateTaskDto } from './dto/create-task.dto';
+import { GetTasksFilterDto } from './dto/get-tasks-filter.dto';
 import { TaskStatus } from './task-status.enum';
 import { Task } from './task.entity';
 import { TasksRepository } from './tasks.repository';
-import { GetTasksFilterDto } from './dto/get-tasks-filter.dto';
 
 interface ITaskService {
   getTasks(filterDto: GetTasksFilterDto): Promise<Task[]>;
   getTaskById(id: string): Promise<Task>;
-  createTask(createTaskDto: CreateTaskDto): Promise<Task>;
+  createTask(createTaskDto: CreateTaskDto, user: User): Promise<Task>;
   deleteTask(id: string): Promise<void>;
   updateTaskStatus(id: string, status: TaskStatus): Promise<Task>;
 }
@@ -30,8 +31,8 @@ export class TasksService implements ITaskService {
     return task;
   }
 
-  createTask(createTaskDto: CreateTaskDto): Promise<Task> {
-    return this.taskRepository.createTask(createTaskDto);
+  createTask(createTaskDto: CreateTaskDto, user: User): Promise<Task> {
+    return this.taskRepository.createTask(createTaskDto, user);
   }
 
   async deleteTask(id: string): Promise<void> {

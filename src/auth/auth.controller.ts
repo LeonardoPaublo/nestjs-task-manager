@@ -15,7 +15,9 @@ export class AuthController {
   }
 
   @Post('/signin')
-  signIn(@Body() authCredentialsDto: AuthCredentialsDto): Promise<string> {
+  signIn(
+    @Body() authCredentialsDto: AuthCredentialsDto,
+  ): Promise<{ accessToken: string }> {
     Logger.log('Signin request received', AuthController.name);
     const response = this.authService.signIn(authCredentialsDto);
     Logger.log('Signin request processed', AuthController.name);
